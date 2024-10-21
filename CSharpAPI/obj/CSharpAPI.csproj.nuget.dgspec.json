@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\zdenn\\Desktop\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj": {}
+    "C:\\Users\\Alex\\Documents\\GitHub\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\zdenn\\Desktop\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj": {
+    "C:\\Users\\Alex\\Documents\\GitHub\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\zdenn\\Desktop\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj",
+        "projectUniqueName": "C:\\Users\\Alex\\Documents\\GitHub\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj",
         "projectName": "CSharpAPI",
-        "projectPath": "C:\\Users\\zdenn\\Desktop\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj",
-        "packagesPath": "C:\\Users\\zdenn\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\zdenn\\Desktop\\Software-Construction\\CSharpAPI\\obj\\",
+        "projectPath": "C:\\Users\\Alex\\Documents\\GitHub\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj",
+        "packagesPath": "C:\\Users\\Alex\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Alex\\Documents\\GitHub\\Software-Construction\\CSharpAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\zdenn\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Alex\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -34,11 +32,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -77,7 +70,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "c:\\program files\\dotnet\\sdk\\8.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
