@@ -1463,19 +1463,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Alex\\.nuget\\packages\\": {}
+    "C:\\Users\\awjva\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Alex\\Documents\\GitHub\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj",
+      "projectUniqueName": "C:\\Users\\awjva\\Documents\\GitHub\\Project-B-Cinema2\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj",
       "projectName": "CSharpAPI",
-      "projectPath": "C:\\Users\\Alex\\Documents\\GitHub\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj",
-      "packagesPath": "C:\\Users\\Alex\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Alex\\Documents\\GitHub\\Software-Construction\\CSharpAPI\\obj\\",
+      "projectPath": "C:\\Users\\awjva\\Documents\\GitHub\\Project-B-Cinema2\\Software-Construction\\CSharpAPI\\CSharpAPI.csproj",
+      "packagesPath": "C:\\Users\\awjva\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\awjva\\Documents\\GitHub\\Project-B-Cinema2\\Software-Construction\\CSharpAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Alex\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\awjva\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -1493,6 +1493,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -1531,16 +1536,8 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Problem reading the cache file C:\\Users\\Alex\\Documents\\GitHub\\Software-Construction\\CSharpAPI\\obj\\project.nuget.cache : Invalid property identifier character: <. Path 'version', line 3, position 0."
-    }
-  ]
+  }
 }
