@@ -8,6 +8,8 @@ def client():
     return Client(base_url="http://localhost:3000/api/v1/",
                   headers={"Content-Type": "application/json", "API_KEY": "a1b2c3d4e5"})
 
+# Happy Path Tests
+
 @patch('httpx.Client.post')
 def test_create_shipment_success(mock_post, client):
     # Mock response data
@@ -24,17 +26,17 @@ def test_create_shipment_success(mock_post, client):
     assert response.status_code == codes.CREATED
     assert "id" in response.json()  # Ensure the response has an ID
 
-@patch('httpx.Client.post')
-def test_create_shipment_invalid_data(mock_post, client):
-    mock_post.return_value.status_code = codes.BAD_REQUEST
+@patch('httpx.Client.get')
+def test_retrieve_all_shipments_success(mock_get, client):
+    mock_get.return_value.status_code = codes.OK
+    mock_get.return_value.json.return_value = [
+        {"id": 1, "destination": "Warehouse A"},
+        {"id": 2, "destination": "Warehouse B"}
+    ]
 
-    new_shipment = {
-        "destination": "",
-        "weight": -10,
-        "sender": "Sender A"
-    }
-    response = client.post("/shipments", json=new_shipment)
-    assert response.status_code == codes.BAD_REQUEST
+    response = client.get("/shipments")  # Assuming the endpoint retrieves all shipments
+    assert response.status_code == codes.OK
+    assert len(response.json()) == 2  # Ensure we received the correct number of shipments
 
 @patch('httpx.Client.get')
 def test_retrieve_shipment(mock_get, client):
@@ -45,13 +47,6 @@ def test_retrieve_shipment(mock_get, client):
     response = client.get("/shipments/1")  # Assuming ID 1 exists
     assert response.status_code == codes.OK
     assert "id" in response.json()
-
-@patch('httpx.Client.get')
-def test_retrieve_non_existent_shipment(mock_get, client):
-    mock_get.return_value.status_code = codes.NOT_FOUND
-
-    response = client.get("/shipments/-1")
-    assert response.status_code == codes.NOT_FOUND
 
 @patch('httpx.Client.put')
 def test_update_shipment_success(mock_put, client):
@@ -70,21 +65,6 @@ def test_delete_shipment_success(mock_delete, client):
 
     response = client.delete("/shipments/1")  # Assuming ID 1 exists
     assert response.status_code == codes.OK
-
-@patch('httpx.Client.post')
-def test_create_shipment_unauthorized(mock_post, client):
-    mock_post.return_value.status_code = codes.UNAUTHORIZED
-
-    client.headers["API_KEY"] = "wrong_key"
-    new_shipment = {
-        "destination": "Warehouse A",
-        "weight": 20,
-        "sender": "Sender A"
-    }
-    response = client.post("/shipments", json=new_shipment)
-    assert response.status_code == codes.UNAUTHORIZED
-
-# Additional Tests
 
 @patch('httpx.Client.post')
 def test_create_shipment_with_login(mock_post, client):
@@ -110,45 +90,22 @@ def test_create_shipment_with_login(mock_post, client):
     assert "id" in response.json()
 
 @patch('httpx.Client.post')
-def test_create_shipment_without_login(mock_post, client):
-    mock_post.return_value.status_code = codes.UNAUTHORIZED
+def test_create_location_success(mock_post, client):
+    # Mock response data for creating a location
+    mock_post.return_value.status_code = codes.CREATED
+    mock_post.return_value.json.return_value = {"id": 1, "name": "Location A", "address": "123 Main St"}
 
-    new_shipment = {
-        "destination": "Warehouse A",
-        "weight": 20,
-        "sender": "Sender A"
+    new_location = {
+        "name": "Location A",
+        "address": "123 Main St"
     }
-    response = client.post("/shipments", json=new_shipment)
-    assert response.status_code == codes.UNAUTHORIZED
-
-@patch('httpx.Client.put')
-def test_update_shipment_with_invalid_data(mock_put, client):
-    mock_put.return_value.status_code = codes.BAD_REQUEST
-
-    updated_shipment = {
-        "weight": -5  # Invalid weight
-    }
-    response = client.put("/shipments/1", json=updated_shipment)  # Assuming ID 1 exists
-    assert response.status_code == codes.BAD_REQUEST
-
-@patch('httpx.Client.put')
-def test_update_shipment_with_valid_data(mock_put, client):
-    mock_put.return_value.status_code = codes.OK
-
-    updated_shipment = {
-        "destination": "Warehouse B",
-        "weight": 25
-    }
-    response = client.put("/shipments/1", json=updated_shipment)  # Assuming ID 1 exists
-    assert response.status_code == codes.OK
-
-@patch('httpx.Client.delete')
-def test_delete_shipment_without_login(mock_delete, client):
-    mock_delete.return_value.status_code = codes.UNAUTHORIZED
-
-    response = client.delete("/shipments/1")  # Assuming ID 1 exists
-    assert response.status_code == codes.UNAUTHORIZED
-
+    response = client.post("/locations", json=new_location)
+    
+    assert response.status_code == codes.CREATED
+    assert "id" in response.json()
+    assert response.json()["name"] == "Location A"
+    assert response.json()["address"] == "123 Main St"
+    
 @patch('httpx.Client.get')
 def test_create_location_and_retrieve(mock_get, client):
     # Mock response data for creating a location
@@ -179,5 +136,118 @@ def test_create_location_and_retrieve(mock_get, client):
     assert response.status_code == codes.OK
     assert response.json()["name"] == "Location A"
 
-# Further tests for locations can be added similarly based on your provided structure.
+# Sad Path Tests
 
+@patch('httpx.Client.post')
+def test_create_shipment_invalid_data(mock_post, client):
+    mock_post.return_value.status_code = codes.BAD_REQUEST
+
+    new_shipment = {
+        "destination": "",
+        "weight": -10,
+        "sender": "Sender A"
+    }
+    response = client.post("/shipments", json=new_shipment)
+    assert response.status_code == codes.BAD_REQUEST
+
+@patch('httpx.Client.get')
+def test_retrieve_non_existent_shipment(mock_get, client):
+    mock_get.return_value.status_code = codes.NOT_FOUND
+
+    response = client.get("/shipments/-1")
+    assert response.status_code == codes.NOT_FOUND
+
+@patch('httpx.Client.put')
+def test_update_shipment_with_invalid_data(mock_put, client):
+    mock_put.return_value.status_code = codes.BAD_REQUEST
+
+    updated_shipment = {
+        "weight": -5  # Invalid weight
+    }
+    response = client.put("/shipments/1", json=updated_shipment)  # Assuming ID 1 exists
+    assert response.status_code == codes.BAD_REQUEST
+
+@patch('httpx.Client.delete')
+def test_delete_shipment_without_login(mock_delete, client):
+    mock_delete.return_value.status_code = codes.UNAUTHORIZED
+
+    response = client.delete("/shipments/1")  # Assuming ID 1 exists
+    assert response.status_code == codes.UNAUTHORIZED
+
+@patch('httpx.Client.post')
+def test_create_shipment_unauthorized(mock_post, client):
+    mock_post.return_value.status_code = codes.UNAUTHORIZED
+
+    client.headers["API_KEY"] = "wrong_key"
+    new_shipment = {
+        "destination": "Warehouse A",
+        "weight": 20,
+        "sender": "Sender A"
+    }
+    response = client.post("/shipments", json=new_shipment)
+    assert response.status_code == codes.UNAUTHORIZED
+
+@patch('httpx.Client.put')
+def test_update_non_existent_shipment(mock_put, client):
+    mock_put.return_value.status_code = codes.NOT_FOUND
+
+    updated_shipment = {
+        "destination": "Warehouse B",
+        "weight": 25
+    }
+    response = client.put("/shipments/999", json=updated_shipment)  # ID 999 doesn't exist
+    assert response.status_code == codes.NOT_FOUND
+
+@patch('httpx.Client.delete')
+def test_delete_non_existent_shipment(mock_delete, client):
+    mock_delete.return_value.status_code = codes.NOT_FOUND
+
+    response = client.delete("/shipments/999")  # ID 999 doesn't exist
+    assert response.status_code == codes.NOT_FOUND
+
+@patch('httpx.Client.get')
+def test_retrieve_shipment_without_login(mock_get, client):
+    mock_get.return_value.status_code = codes.UNAUTHORIZED
+
+    response = client.get("/shipments/1")
+    assert response.status_code == codes.UNAUTHORIZED
+
+@patch('httpx.Client.post')
+def test_create_shipment_missing_fields(mock_post, client):
+    mock_post.return_value.status_code = codes.BAD_REQUEST
+
+    new_shipment = {
+        "weight": 20,  # Missing destination and sender
+    }
+    response = client.post("/shipments", json=new_shipment)
+    assert response.status_code == codes.BAD_REQUEST
+
+@patch('httpx.Client.post')
+def test_create_shipment_without_login(mock_post, client):
+    mock_post.return_value.status_code = codes.UNAUTHORIZED
+
+    new_shipment = {
+        "destination": "Warehouse A",
+        "weight": 20,
+        "sender": "Sender A"
+    }
+    response = client.post("/shipments", json=new_shipment)
+    assert response.status_code == codes.UNAUTHORIZED
+
+@patch('httpx.Client.post')
+def test_create_shipment_invalid_json(mock_post, client):
+    mock_post.return_value.status_code = codes.BAD_REQUEST
+
+    response = client.post("/shipments", data="invalid json")
+    assert response.status_code == codes.BAD_REQUEST
+
+# Tests for Updating Shipment Without Required Fields
+@patch('httpx.Client.put')
+def test_update_shipment_without_required_fields(mock_put, client):
+    mock_put.return_value.status_code = codes.BAD_REQUEST
+
+    updated_shipment = {
+        "weight": 15  # Missing destination
+    }
+    response = client.put("/shipments/1", json=updated_shipment)  # Assuming ID 1 exists
+    assert response.status_code == codes.BAD_REQUEST
