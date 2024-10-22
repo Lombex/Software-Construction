@@ -1,1 +1,1 @@
-python3 ./api/main.py
+python ./api/main.py

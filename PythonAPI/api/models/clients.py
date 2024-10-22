@@ -1,9 +1,7 @@
 import json
-
 from models.base import Base
 
 CLIENTS = []
-
 
 class Clients(Base):
     def __init__(self, root_path, is_debug=False):
