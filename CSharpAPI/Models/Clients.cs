@@ -1,3 +1,4 @@
+
 namespace CSharpAPI.Models {
     public class ClientsModel {
         public int id { get; set; }
@@ -12,5 +13,6 @@ namespace CSharpAPI.Models {
         public string? contact_email { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
+        public List<OrdersModel>? Orders { get; set; }
     }
 }
