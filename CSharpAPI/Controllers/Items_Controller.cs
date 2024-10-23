@@ -1,31 +1,31 @@
+using Microsoft.AspNetCore.Mvc;
 using CSharpAPI.Models;
 using CSharpAPI.Service;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 
 namespace CSharpAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/items")]
     [ApiController]
-    public class ItemController : ControllerBase
+    public class ItemsController : ControllerBase
     {
-        private readonly IItemsService _itemService;
+        private readonly IItemsService _itemsService;
 
-        public ItemController(IItemsService itemService)
+        public ItemsController(IItemsService itemsService)
         {
-            _itemService = itemService;
+            _itemsService = itemsService;
         }
 
         [HttpGet]
-        public ActionResult<List<ItemsModel>> GetAllItems()
+        public ActionResult<IEnumerable<ItemsModel>> GetAllItems()
         {
-            return Ok(_itemService.GetAllItems());
+            var items = _itemsService.GetAllItems();
+            return Ok(items);
         }
 
         [HttpGet("{uid}")]
-        public ActionResult<ItemsModel> GetItemByUid(string uid)
+        public ActionResult<ItemsModel> GetItemById(string uid)
         {
-            var item = _itemService.GetItemByUid(uid);
+            var item = _itemsService.GetItemById(uid);
             if (item == null)
             {
                 return NotFound();
@@ -33,35 +33,69 @@ namespace CSharpAPI.Controllers
             return Ok(item);
         }
 
-        [HttpPost]
-        public ActionResult CreateItem([FromBody] ItemsModel item)
+        [HttpGet("items/itemline/{itemLineId}")]
+        public ActionResult<IEnumerable<ItemsModel>> GetItemsByItemLine(int itemLineId)
         {
-            if (item == null)
+            var items = _itemsService.GetItemsByItemLine(itemLineId);
+            return Ok(items);
+        }
+
+        [HttpGet("items/itemgroup/{itemGroupId}")]
+        public ActionResult<IEnumerable<ItemsModel>> GetItemsByItemGroup(int itemGroupId)
+        {
+            var items = _itemsService.GetItemsByItemGroup(itemGroupId);
+            return Ok(items);
+        }
+
+        [HttpGet("items/itemtype/{itemTypeId}")]
+        public ActionResult<IEnumerable<ItemsModel>> GetItemsByItemType(int itemTypeId)
+        {
+            var items = _itemsService.GetItemsByItemType(itemTypeId);
+            return Ok(items);
+        }
+
+        [HttpGet("items/supplier/{supplierId}")]
+        public ActionResult<IEnumerable<ItemsModel>> GetItemsBySupplierId(int supplierId)
+        {
+            var items = _itemsService.GetItemsBySupplierId(supplierId);
+            return Ok(items);
+        }
+
+        [HttpPut("{uid}")]
+        public IActionResult UpdateItem(string uid, [FromBody] ItemsModel updatedItem)
+        {
+            if (uid != updatedItem.uid)
             {
                 return BadRequest();
             }
 
-            _itemService.CreateItem(item);
-            return CreatedAtAction(nameof(GetItemByUid), new { uid = item.uid }, item);
-        }
-
-        [HttpPut("{uid}")]
-        public ActionResult UpdateItem(string uid, [FromBody] ItemsModel updateItem)
-        {
-            if (!_itemService.UpdateItem(uid, updateItem))
+            var existingItem = _itemsService.GetItemById(uid);
+            if (existingItem == null)
             {
                 return NotFound();
             }
+
+            _itemsService.UpdateItem(updatedItem);
             return NoContent();
         }
 
-        [HttpDelete("{uid}")]
-        public ActionResult DeleteItem(string uid)
+        [HttpPost]
+        public ActionResult<ItemsModel> CreateItem([FromBody] ItemsModel newItem)
         {
-            if (!_itemService.DeleteItem(uid))
+            _itemsService.AddItem(newItem);
+            return CreatedAtAction(nameof(GetItemById), new { uid = newItem.uid }, newItem);
+        }
+
+        [HttpDelete("{uid}")]
+        public IActionResult DeleteItem(string uid)
+        {
+            var existingItem = _itemsService.GetItemById(uid);
+            if (existingItem == null)
             {
                 return NotFound();
             }
+
+            _itemsService.DeleteItem(uid);
             return NoContent();
         }
     }
