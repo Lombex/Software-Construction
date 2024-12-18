@@ -9,6 +9,9 @@ namespace CSharpAPI.Services
     {
         string GenerateToken(string apiKey, int? warehouseId, string role);
         bool ValidateToken(string token, out string role, out int? warehouseId);
+        string CreateApiKey();
+        bool ValidateApiKey(string apiKey);
+        string SuperAdminApiKey { get; }
     }
 
     public class JwtService : IJwtService
@@ -16,12 +19,35 @@ namespace CSharpAPI.Services
         private readonly string _secretKey;
         private readonly string _issuer;
         private readonly string _audience;
+        public string SuperAdminApiKey { get; } = "SUPERADMIN_5UP3R_53CR3T_K3Y_2024!";
 
         public JwtService(IConfiguration configuration)
         {
-            _secretKey = configuration["Jwt:Key"] ?? "your-256-bit-secret";
-            _issuer = configuration["Jwt:Issuer"] ?? "your-issuer";
-            _audience = configuration["Jwt:Audience"] ?? "your-audience";
+            _secretKey = configuration["Jwt:Key"] ?? "mysupersecret_secretkey!mysupersecret_secretkey!@#$";  // At least 32 characters for 256 bits
+            _issuer = configuration["Jwt:Issuer"] ?? "csharpapi";
+            _audience = configuration["Jwt:Audience"] ?? "csharpapi";
+        }
+
+        public string CreateApiKey()
+        {
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString("x");
+            var random = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+                .Replace("/", "_")
+                .Replace("+", "-")
+                .Replace("=", "");
+
+            return $"API_{timestamp}_{random[..8]}".ToUpper();
+        }
+
+        public bool ValidateApiKey(string apiKey)
+        {
+            if (string.IsNullOrEmpty(apiKey))
+                return false;
+
+            if (apiKey == SuperAdminApiKey)
+                return true;
+
+            return apiKey.StartsWith("API_") && apiKey.Count(c => c == '_') == 2;
         }
 
         public string GenerateToken(string apiKey, int? warehouseId, string role)

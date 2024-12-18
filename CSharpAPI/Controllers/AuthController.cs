@@ -17,18 +17,22 @@ namespace CSharpAPI.Controllers
         [HttpPost("token")]
         public IActionResult GenerateToken([FromBody] TokenRequest request)
         {
-            // Check if the requesting user is admin (you might want to add additional security here)
-            var authHeader = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            if (authHeader == null)
+            if (request == null || string.IsNullOrEmpty(request.Role))
             {
-                return Unauthorized();
+                return BadRequest("Invalid request");
             }
 
-            string role;
-            int? warehouseId;
-            if (!_jwtService.ValidateToken(authHeader, out role, out warehouseId) || role != "Admin")
+            // Get the API key from the Authorization header
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            if (string.IsNullOrEmpty(authHeader))
             {
-                return Unauthorized();
+                return Unauthorized("No authorization header provided");
+            }
+
+            // Check if it's the superadmin key
+            if (authHeader != _jwtService.SuperAdminApiKey)
+            {
+                return Unauthorized("Invalid credentials");
             }
 
             // Validate requested role
@@ -37,11 +41,29 @@ namespace CSharpAPI.Controllers
                 return BadRequest("Invalid role specified");
             }
 
-            // Generate a unique API key for the new token
-            string apiKey = Guid.NewGuid().ToString("N");
-            
+            // Generate new API key and token
+            string apiKey = _jwtService.CreateApiKey();
             var token = _jwtService.GenerateToken(apiKey, request.WarehouseId, request.Role);
-            return Ok(new { token });
+
+            return Ok(new { token, apiKey });
+        }
+
+        [HttpPost("apikey")]
+        public IActionResult CreateApiKey()
+        {
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            if (string.IsNullOrEmpty(authHeader))
+            {
+                return Unauthorized("No authorization header provided");
+            }
+
+            if (authHeader != _jwtService.SuperAdminApiKey)
+            {
+                return Unauthorized("Only superadmin can create new API keys");
+            }
+
+            var newApiKey = _jwtService.CreateApiKey();
+            return Ok(new { apiKey = newApiKey });
         }
 
         private bool IsValidRole(string role)

@@ -1,15 +1,19 @@
-### Test with Admin API Key (Full Access)
-
+### Get a token using superadmin API key
 POST http://localhost:5001/api/v1/auth/token
 Content-Type: application/json
-Authorization: Bearer a1b2c3d4e5
+Authorization: Bearer SUPERADMIN_5UP3R_53CR3T_K3Y_2024!
 
 {
     "role": "Admin"
 }
+
+### Create new API key
+POST http://localhost:5001/api/v1/auth/apikey
+Content-Type: application/json
+Authorization: Bearer SUPERADMIN_5UP3R_53CR3T_K3Y_2024!
 ###
 POST http://localhost:5001/api/v1/auth/token
-Authorization: Bearer <admin-token>
+Authorization: Bearer <API_193DA33C348_AWWUDZX4>
 Content-Type: application/json
 
 {
@@ -20,7 +24,7 @@ Content-Type: application/json
 ### Get all clients (Admin)
 GET http://localhost:5001/api/v1/clients/all
 Content-Type: application/json
-API_KEY: admin_key_2024
+API_KEY: API_193DA33C348_AWWUDZX4
 
 ### Get client by id (Admin)
 GET http://localhost:5001/api/v1/clients/9821
