@@ -1,4 +1,19 @@
 ### Test with Admin API Key (Full Access)
+POST /api/v1/auth/token
+Content-Type: application/json
+
+{
+    "role": "Admin"
+}
+###
+POST /api/v1/auth/token
+Authorization: Bearer <admin-token>
+Content-Type: application/json
+
+{
+    "role": "WarehouseManager",
+    "warehouseId": 123
+}
 
 ### Get all clients (Admin)
 GET http://localhost:5001/api/v1/clients/all

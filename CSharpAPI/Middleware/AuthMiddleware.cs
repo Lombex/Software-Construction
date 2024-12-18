@@ -1,49 +1,78 @@
 using CSharpAPI.Services;
-using CSharpAPI.Services.Auth;
+using CSharpAPI.Services.auth;
+
+
 namespace CSharpAPI.Middleware
 {
-
-
-public class AuthMiddleware
-{
-    private readonly RequestDelegate _next;
-
-    public AuthMiddleware(RequestDelegate next)
+    public class AuthMiddleware
     {
-        _next = next;
+        private readonly RequestDelegate _next;
+        private readonly IJwtService _jwtService;
+        private readonly IAuthService _authService;
+
+        public AuthMiddleware(RequestDelegate next, IJwtService jwtService, IAuthService authService)
+        {
+            _next = next;
+            _jwtService = jwtService;
+            _authService = authService;
+        }
+
+        public async Task InvokeAsync(HttpContext context)
+        {
+            // Skip auth for token generation endpoint if it's an admin generating tokens
+            if (context.Request.Path.StartsWithSegments("/api/v1/auth/token"))
+            {
+                await _next(context);
+                return;
+            }
+
+            string? token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+            if (token != null)
+            {
+                string role;
+                int? warehouseId;
+
+                if (_jwtService.ValidateToken(token, out role, out warehouseId))
+                {
+                    var resource = context.Request.Path.Value?.Split('/')
+                        .Skip(3)  // Skip /api/v1/
+                        .FirstOrDefault();
+
+                    if (resource != null)
+                    {
+                        var hasAccess = await _authService.HasAccess(
+                            role, 
+                            warehouseId, 
+                            resource, 
+                            context.Request.Method
+                        );
+
+                        if (hasAccess)
+                        {
+                            context.Items["Role"] = role;
+                            if (warehouseId.HasValue)
+                            {
+                                context.Items["WarehouseId"] = warehouseId.Value;
+                            }
+
+                            await _next(context);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            context.Response.StatusCode = 401;
+            await context.Response.WriteAsync("Unauthorized");
+        }
     }
 
-    public async Task InvokeAsync(HttpContext context, IAuthService authService) // Inject here instead
+    public static class AuthMiddlewareExtensions
     {
-        if (!context.Request.Headers.TryGetValue("API_KEY", out var apiKey))
+        public static IApplicationBuilder UseAuthMiddleware(this IApplicationBuilder builder)
         {
-            context.Response.StatusCode = 401;
-            await context.Response.WriteAsJsonAsync(new { message = "API key is required" });
-            return;
+            return builder.UseMiddleware<AuthMiddleware>();
         }
-
-        var user = await authService.GetUserByApiKey(apiKey);
-        if (user == null)
-        {
-            context.Response.StatusCode = 401;
-            await context.Response.WriteAsJsonAsync(new { message = "Invalid API key" });
-            return;
-        }
-
-        var path = context.Request.Path.Value?.Split('/')
-            .Where(s => !string.IsNullOrEmpty(s))
-            .Skip(2)  // Skip "api/v1"
-            .FirstOrDefault();
-
-        if (path == null || !await authService.HasAccess(user, path, context.Request.Method))
-        {
-            context.Response.StatusCode = 403;
-            await context.Response.WriteAsJsonAsync(new { message = "Access denied" });
-            return;
-        }
-
-        context.Items["User"] = user;
-        await _next(context);
     }
-}
 }

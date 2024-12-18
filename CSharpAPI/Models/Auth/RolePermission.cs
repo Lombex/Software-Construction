@@ -11,6 +11,7 @@ namespace CSharpAPI.Models.Auth
         public bool can_create { get; set; }
         public bool can_update { get; set; }
         public bool can_delete { get; set; }
+        public bool warehouse_specific { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
     }

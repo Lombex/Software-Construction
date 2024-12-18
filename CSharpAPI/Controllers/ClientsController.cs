@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using CSharpAPI.Models;
-using CSharpAPI.Models.Auth;
 using CSharpAPI.Services;
-using CSharpAPI.Services.Auth;
 
 
 namespace CSharpAPI.Controllers
@@ -22,8 +20,9 @@ namespace CSharpAPI.Controllers
 
         private async Task<bool> CheckAccess(string method)
         {
-            var user = HttpContext.Items["User"] as ApiUser;
-            return await _authService.HasAccess(user, "clients", method);
+            var role = HttpContext.Items["Role"] as string;
+            var warehouseId = HttpContext.Items["WarehouseId"] as int?;
+            return await _authService.HasAccess(role, warehouseId, "clients", method);
         }
 
         [HttpGet("all")]
