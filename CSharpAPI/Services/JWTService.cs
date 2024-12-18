@@ -7,7 +7,7 @@ namespace CSharpAPI.Services
 {
     public interface IJwtService
     {
-        string GenerateToken(string role, int? warehouseId);
+        string GenerateToken(string apiKey, int? warehouseId, string role);
         bool ValidateToken(string token, out string role, out int? warehouseId);
     }
 
@@ -19,19 +19,20 @@ namespace CSharpAPI.Services
 
         public JwtService(IConfiguration configuration)
         {
-            _secretKey = configuration["Jwt:SecretKey"] ?? throw new ArgumentNullException("JWT Secret Key is not configured");
-            _issuer = configuration["Jwt:Issuer"] ?? throw new ArgumentNullException("JWT Issuer is not configured");
-            _audience = configuration["Jwt:Audience"] ?? throw new ArgumentNullException("JWT Audience is not configured");
+            _secretKey = configuration["Jwt:Key"] ?? "your-256-bit-secret";
+            _issuer = configuration["Jwt:Issuer"] ?? "your-issuer";
+            _audience = configuration["Jwt:Audience"] ?? "your-audience";
         }
 
-        public string GenerateToken(string role, int? warehouseId)
+        public string GenerateToken(string apiKey, int? warehouseId, string role)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Role, role),
+                new Claim(ClaimTypes.NameIdentifier, apiKey),
+                new Claim(ClaimTypes.Role, role)
             };
 
             if (warehouseId.HasValue)
@@ -43,7 +44,7 @@ namespace CSharpAPI.Services
                 issuer: _issuer,
                 audience: _audience,
                 claims: claims,
-                expires: DateTime.Now.AddYears(1), // Tokens valid for 1 year since they're distributed manually
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: credentials
             );
 
@@ -58,28 +59,33 @@ namespace CSharpAPI.Services
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(_secretKey);
+                var key = Encoding.ASCII.GetBytes(_secretKey);
 
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                var validationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
-                    ValidIssuer = _issuer,
                     ValidateAudience = true,
+                    ValidIssuer = _issuer,
                     ValidAudience = _audience,
-                    ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
+                };
 
-                var jwtToken = (JwtSecurityToken)validatedToken;
-                
-                role = jwtToken.Claims.First(x => x.Type == ClaimTypes.Role).Value;
-                
-                var warehouseIdClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "WarehouseId");
-                if (warehouseIdClaim != null && int.TryParse(warehouseIdClaim.Value, out int wId))
+                ClaimsPrincipal principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+
+                // Extract role
+                var roleClaim = principal.FindFirst(ClaimTypes.Role);
+                if (roleClaim == null)
+                    return false;
+
+                role = roleClaim.Value;
+
+                // Extract warehouse ID if present
+                var warehouseIdClaim = principal.FindFirst("WarehouseId");
+                if (warehouseIdClaim != null && int.TryParse(warehouseIdClaim.Value, out int whId))
                 {
-                    warehouseId = wId;
+                    warehouseId = whId;
                 }
 
                 return true;

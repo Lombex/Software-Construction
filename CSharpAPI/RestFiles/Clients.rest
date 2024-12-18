@@ -1,12 +1,14 @@
 ### Test with Admin API Key (Full Access)
-POST /api/v1/auth/token
+
+POST http://localhost:5001/api/v1/auth/token
 Content-Type: application/json
+Authorization: Bearer a1b2c3d4e5
 
 {
     "role": "Admin"
 }
 ###
-POST /api/v1/auth/token
+POST http://localhost:5001/api/v1/auth/token
 Authorization: Bearer <admin-token>
 Content-Type: application/json
 

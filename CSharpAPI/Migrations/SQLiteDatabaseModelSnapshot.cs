@@ -84,6 +84,9 @@ namespace CSharpAPI.Migrations
                     b.Property<DateTime>("updated_at")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("warehouse_specific")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("id");
 
                     b.HasIndex("role", "resource")

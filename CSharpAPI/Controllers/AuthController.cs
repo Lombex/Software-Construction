@@ -37,7 +37,10 @@ namespace CSharpAPI.Controllers
                 return BadRequest("Invalid role specified");
             }
 
-            var token = _jwtService.GenerateToken(request.Role, request.WarehouseId);
+            // Generate a unique API key for the new token
+            string apiKey = Guid.NewGuid().ToString("N");
+            
+            var token = _jwtService.GenerateToken(apiKey, request.WarehouseId, request.Role);
             return Ok(new { token });
         }
 

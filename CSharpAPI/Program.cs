@@ -1,6 +1,5 @@
 using CSharpAPI.Service;
 using CSharpAPI.Services;
-using CSharpAPI.Services.auth;
 using CSharpAPI.Middleware;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +36,7 @@ builder.Services.AddScoped<IItemTypeService, ItemTypeService>();
 builder.Services.AddScoped<IItemLineService, ItemLineService>();
 builder.Services.AddScoped<IItemGroupService, ItemGroupService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddSingleton<IJwtService, JwtService>();
 
 // Add CORS
 builder.Services.AddCors(options =>

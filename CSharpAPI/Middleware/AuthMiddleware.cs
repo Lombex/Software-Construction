@@ -1,23 +1,17 @@
 using CSharpAPI.Services;
-using CSharpAPI.Services.auth;
-
 
 namespace CSharpAPI.Middleware
 {
     public class AuthMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IJwtService _jwtService;
-        private readonly IAuthService _authService;
 
-        public AuthMiddleware(RequestDelegate next, IJwtService jwtService, IAuthService authService)
+        public AuthMiddleware(RequestDelegate next)
         {
             _next = next;
-            _jwtService = jwtService;
-            _authService = authService;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, IJwtService jwtService, IAuthService authService)
         {
             // Skip auth for token generation endpoint if it's an admin generating tokens
             if (context.Request.Path.StartsWithSegments("/api/v1/auth/token"))
@@ -33,7 +27,7 @@ namespace CSharpAPI.Middleware
                 string role;
                 int? warehouseId;
 
-                if (_jwtService.ValidateToken(token, out role, out warehouseId))
+                if (jwtService.ValidateToken(token, out role, out warehouseId))
                 {
                     var resource = context.Request.Path.Value?.Split('/')
                         .Skip(3)  // Skip /api/v1/
@@ -41,7 +35,7 @@ namespace CSharpAPI.Middleware
 
                     if (resource != null)
                     {
-                        var hasAccess = await _authService.HasAccess(
+                        var hasAccess = await authService.HasAccess(
                             role, 
                             warehouseId, 
                             resource, 
